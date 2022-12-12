@@ -13,7 +13,7 @@ const uploader = async (req, res, next) => {
     const fileName = `${body.name}`;
     const cloudinaryOpt = {
         public_id: fileName,
-        folder: "coffee_addict",
+        folder: "Coffee-Time",
     };
 
     try {
