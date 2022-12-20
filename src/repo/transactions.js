@@ -37,7 +37,7 @@ const historyTransactions = (queryparams, token) => {
         let query = "select transactions.id, users.email, product.name, product.image, transactions.qty, transactions.tax, transactions.method_payment, transactions.total, transactions.status from transactions inner join users on users.id = transactions.user_id inner join product on product.id = transactions.product_id where users.id = $1";
 
         let queryLimit = "";
-        let link = `http://localhost:6060/coffee/transactions/history?`
+        let link = `https://coffee-time-be-new.vercel.app/coffee/transactions/history?`
 
 
         let values = [token];
@@ -115,19 +115,47 @@ const historyTransactions = (queryparams, token) => {
 
 const createTransactions = (body, token) => {
     return new Promise((resolve, reject) => {
-        const query = "insert into transactions (user_id, product_id, promo_id, delivery_id, method_payment, qty, tax, total, status) values ($1,$2,$3,$4,$5,$6,$7,$8,$9)"
-        const { product_id, promo_id, delivery_id, method_payment, qty, tax, total, status } = body;
+        const query =
+            "insert into transactions (user_id, product_id, promo_id, delivery_id, method_payment, qty, tax, total, status) values ($1,$2,$3,$4,$5,$6,$7,$8,$9) returning product_id";
+        const {
+            product_id,
+            promo_id,
+            delivery_id,
+            method_payment,
+            qty,
+            tax,
+            total,
+            status,
+        } = body;
         postgreDb.query(
-            query, [token, product_id, promo_id, delivery_id, method_payment, qty, tax, total, status], (err, queryResult) => {
+            query,
+            [
+                token,
+                product_id,
+                promo_id,
+                delivery_id,
+                method_payment,
+                qty,
+                tax,
+                total,
+                status,
+            ],
+            (err, queryResult) => {
                 if (err) {
                     console.log(err);
                     return reject(err);
-                }
-                resolve(queryResult);
+                } const getQuery = "select * from product where id = $1"
+                postgreDb.query(getQuery, [queryResult.rows[0].product_id], (err, result) => {
+                    if (err) {
+                        console.log(err);
+                        return reject(err)
+                    }
+                    resolve(result.rows[0])
+                })
             }
-        )
-    })
-}
+        );
+    });
+};
 
 const editTransactions = (body, params) => {
     return new Promise((resolve, reject) => {
@@ -155,6 +183,34 @@ const editTransactions = (body, params) => {
     });
 };
 
+const getByStatus = () => {
+    return new Promise((resolve, reject) => {
+        const query =
+            "select transactions.id,profile.displayname, transactions.qty,transactions.total,product.name,product.image,transactions.status from transactions inner join users on transactions.user_id = users.id inner join profile on users.id = profile.users_id inner join product on transactions.product_id = product.id where transactions.status = 'paid' or transactions.status ='pending' order by transactions.create_at DESC";
+        postgreDb.query(query, (err, result) => {
+            if (err) {
+                console.log(err);
+                return reject(err);
+            }
+            return resolve(result);
+        });
+    });
+};
+
+const statusApprove = (status, id) => {
+    return new Promise((resolve, reject) => {
+        const query =
+            "update transactions set status = $1 where id = $2";
+        postgreDb.query(query, [status, id], (err, result) => {
+            if (err) {
+                console.log(err);
+                return reject(err);
+            }
+            return resolve(result);
+        });
+    });
+}
+
 const dropTransactions = (params) => {
     return new Promise((resolve, reject) => {
         const query = "delete from transactions where id = $1";
@@ -173,7 +229,9 @@ const transactionsRepo = {
     historyTransactions,
     createTransactions,
     editTransactions,
-    dropTransactions
+    dropTransactions,
+    getByStatus,
+    statusApprove
 }
 
 module.exports = transactionsRepo;

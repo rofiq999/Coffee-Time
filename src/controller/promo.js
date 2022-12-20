@@ -43,28 +43,45 @@ const search = async (req, res) => {
 const create = async (req, res) => {
     try {
         console.log(req.body);
-        await promoRepo.create(req.body);
+        await promoRepo.create(
+            req.body,
+            req.file.secure_url,
+        );
         sendResponse.success(res, 200, {
             msg: "Create Promo Success",
-        })
-
+        });
     } catch (err) {
-        sendResponse.error(res, 500, "Internal Server Error")
+        sendResponse.error(
+            res,
+            500,
+            "Internal Server Error",
+        );
     }
 };
 
 // Edit Promo
 const edit = async (req, res) => {
     try {
+        if (req.file) {
+            var image = `/${req.file.public_id}.${req.file.format}`; //ubah filename
+            req.body.image = req.file.secure_url;
+        }
         console.log(req.body);
-        await promoRepo.edit(req.body, req.params);
+        const result = await promoRepo.edit(
+            req.body,
+            req.params,
+        );
         sendResponse.success(res, 200, {
-            msg: "Create Promo Success",
-            data: req.body
-        })
-
+            msg: "Edit Promo Success",
+            data: result.rows,
+            filename: image,
+        });
     } catch (err) {
-        sendResponse.error(res, 500, "Internal Server Error")
+        sendResponse.error(
+            res,
+            500,
+            "Internal Server Error",
+        );
     }
 };
 

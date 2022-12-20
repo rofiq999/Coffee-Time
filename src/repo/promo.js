@@ -1,10 +1,8 @@
 const postgreDb = require("../config/postgre")
 
-
-
 const get = () => {
     return new Promise((resolve, reject) => {
-        const query = "select promo.*, product.name, product.category, product.size, product.price, product.stock, product.image, product.description from promo inner join product on product.id = promo.product_id";
+        const query = "select promo.*, product.name, product.category, product.size, product.price, product.stock from promo inner join product on product.id = promo.product_id";
         postgreDb.query(query, (err, result) => {
             if (err) {
                 console.log(err);
@@ -18,7 +16,7 @@ const get = () => {
 
 const getid = (params) => {
     return new Promise((resolve, reject) => {
-        const query = "select promo.*, product.* from promo inner join product on promo.product_id = product.id where promo.id = $1";
+        const query = "select product.name, promo.*  from promo inner join product on promo.product_id = product.id where promo.id = $1";
         postgreDb.query(query, [params.id], (err, result) => {
             if (err) {
                 console.log(err);
@@ -31,27 +29,27 @@ const getid = (params) => {
 
 const searchPromo = (queryparams) => {
     return new Promise((resolve, reject) => {
-      const { code, product_id } = queryparams;
-      let query = `select promo.id, promo.product_id, product.name, promo.* from promo inner join product on product.id = promo.product_id where product.id = $1`;
-      if (code) {
-        query += ` and lower(promo.code) = lower('${code}') `;
-      }
-      postgreDb.query(query, [product_id], (err, result) => {
-        if (err) {
-          console.log(err);
-          return reject(err);
+        const { code, product_id } = queryparams;
+        let query = `select promo.id, promo.product_id, product.name, promo.* from promo inner join product on product.id = promo.product_id where product.id = $1`;
+        if (code) {
+            query += ` and lower(promo.code) = lower('${code}') `;
         }
-        return resolve(result);
-      });
+        postgreDb.query(query, [product_id], (err, result) => {
+            if (err) {
+                console.log(err);
+                return reject(err);
+            }
+            return resolve(result);
+        });
     });
-  };
+};
 
-const create = (body) => {
+const create = (body, file) => {
     return new Promise((resolve, reject) => {
-        const query = "insert into promo ( product_id, code, discount, valid) values ($1,$2,$3,$4)"
-        const { product_id, code, discount, valid } = body;
+        const query = "insert into promo ( product_id, code, discount, valid,image,hex_color) values ($1,$2,$3,$4,$5,$6) returning *"
+        const { product_id, code, discount, valid, color } = body;
         postgreDb.query(
-            query, [product_id, code, discount, valid], (err, queryResult) => {
+            query, [product_id, code, discount, valid, file, color], (err, queryResult) => {
                 if (err) {
                     console.log(err);
                     return reject(err);
@@ -69,7 +67,7 @@ const edit = (body, params) => {
         // menggunakan perulangan untuk dapat melakukan pengubahan semua data pada table product
         Object.keys(body).forEach((key, idx, array) => {
             if (idx === array.length - 1) {
-                query += `${key} = $${idx + 1} where id = $${idx + 2}`;
+                query += `${key} = $${idx + 1} where id = $${idx + 2} returning *`;
                 values.push(body[key], params.id);
                 return;
             }
@@ -87,7 +85,6 @@ const edit = (body, params) => {
             });
     });
 }
-
 
 const drop = (params) => {
     return new Promise((resolve, reject) => {
@@ -113,4 +110,3 @@ const promoRepo = {
 }
 
 module.exports = promoRepo;
-
