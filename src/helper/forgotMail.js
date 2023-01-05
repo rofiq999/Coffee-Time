@@ -20,7 +20,7 @@ OAuth2Client.setCredentials({
 });
 
 module.exports = {
-  sendMail: (data) =>
+  forgotMail: (data) =>
     new Promise((resolve, reject) => {
       const accessToken = OAuth2Client.getAccessToken;
 
@@ -40,7 +40,8 @@ module.exports = {
         path.join(__dirname, "..", "templates", "email", `${data.template}`),
         "utf8"
       );
-      // console.log(fileTemplate);
+
+      console.log(fileTemplate);
 
       const mailOptions = {
         from: '"CoffeeTime" <rofiqhidayat296@gmail.com>', // sender address

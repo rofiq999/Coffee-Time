@@ -27,18 +27,18 @@ const history = async (req, res) => {
 
 const create = async (req, res) => {
     try {
-        const result = await transactionsRepo.createTransactions(
-            req.body,
-            req.userPayload.user_id
-        );
-        sendResponse.success(res, 200, {
-            msg: "Create data success",
-            data: result
-        });
+      const result = await transactionsRepo.createTransactions(
+        req.body,
+        req.userPayload.user_id
+      );
+      sendResponse.success(res, 200, {
+        msg: "Create data success",
+        data: result
+      });
     } catch (err) {
-        sendResponse.error(res, 500, "Internal Server Error");
+      sendResponse.error(res, 500, "Internal Server Error");
     }
-}
+  };
 
 
 const edit = async (req, res) => {
@@ -66,22 +66,22 @@ const drop = async (req, res) => {
 
 const getStatus = async (req, res) => {
     try {
-        const response = await transactionsRepo.getByStatus();
-        sendResponse.success(res, 200, response.rows);
+      const response = await transactionsRepo.getByStatus();
+      sendResponse.success(res, 200, response.rows);
     } catch (err) {
-        sendResponse.error(res, 500, "internal server error");
+      sendResponse.error(res, 500, "internal server error");
     }
-};
-
-const patchStatus = async (req, res) => {
+  };
+  
+  const patchStatus = async (req, res) => {
     try {
-        const { status, id } = req.params;
-        const response = await transactionsRepo.statusApprove(status, id);
-        sendResponse.success(res, 200, `your transactions ${status}`);
+      const { status, id } = req.params;
+      const response = await transactionsRepo.statusApprove(status, id);
+      sendResponse.success(res, 200, `your transactions ${status}`);
     } catch (err) {
-        sendResponse.error(res, 500, "internal server error");
+      sendResponse.error(res, 500, "internal server error");
     }
-};
+  };
 
 
 
