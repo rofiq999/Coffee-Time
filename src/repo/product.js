@@ -41,7 +41,7 @@ const search = (queryparams, hostAPI) => {
             query += "order by create_at asc";
             link += `sorting=${queryparams.sorting}&`
         }
-        if (queryparams.sorting == "lates") {
+        if (queryparams.sorting == "latter") {
             query += "order by create_at desc";
             link += `sorting=${queryparams.sorting}&`
         }
@@ -178,10 +178,10 @@ const edit = (body, params) => {
 
 const drop = (params) => {
     return new Promise((resolve, reject) => {
-        const {id} = params
+        const { id } = params
         const timestamp = Date.now() / 1000;
         const query = "update product set delete_at = to_timestamp($1) where id = $2";
-        postgreDb.query(query, [timestamp , id], (err, result) => {
+        postgreDb.query(query, [timestamp, id], (err, result) => {
             if (err) {
                 console.log(err);
                 return reject(err);
