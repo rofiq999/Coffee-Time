@@ -37,11 +37,11 @@ const search = (queryparams, hostAPI) => {
             query += "order by price desc";
             link += `sorting=${queryparams.sorting}&`
         }
-        if (queryparams.sorting == "newest") {
+        if (queryparams.sorting == "latter") {
             query += "order by create_at asc";
             link += `sorting=${queryparams.sorting}&`
         }
-        if (queryparams.sorting == "latter") {
+        if (queryparams.sorting == "newest") {
             query += "order by create_at desc";
             link += `sorting=${queryparams.sorting}&`
         }
